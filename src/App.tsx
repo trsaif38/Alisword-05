@@ -1,63 +1,11 @@
-import React, { useState, useEffect } from "react";
-import { Menu, LogIn, Download } from "lucide-react";
+import React, { useState } from "react";
+import { Menu, Download } from "lucide-react";
 import { Sidebar } from "./components/Sidebar";
-import { LoginModal } from "./components/LoginModal";
-import { UserProfileModal } from "./components/UserProfileModal";
 import { AdSlot } from "./components/AdSlot";
 import { VideoDownloader } from "./components/VideoDownloader";
-import { cn } from "./lib/utils";
-import { auth, googleProvider, isFirebaseConfigured } from "./lib/firebase";
-import { signInWithPopup, signOut, onAuthStateChanged, User } from "firebase/auth";
 
 export default function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
-
-  // Auth listener
-  useEffect(() => {
-    if (!auth) return;
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-    });
-    return () => unsubscribe();
-  }, []);
-
-  const handleLogin = async () => {
-    if (!auth || !googleProvider) {
-      alert("Firebase is not configured. Please set your Firebase environment variables in the Secrets panel.");
-      return;
-    }
-    try {
-      await signInWithPopup(auth, googleProvider);
-      setIsLoginModalOpen(false);
-    } catch (error: any) {
-      console.error("Login failed", error);
-      if (error.code === "auth/unauthorized-domain") {
-        const currentDomain = window.location.hostname;
-        alert(
-          `Unauthorized Domain Error!\n\n` +
-          `Please add "${currentDomain}" to your Firebase Authorized Domains list.\n\n` +
-          `Steps:\n` +
-          `1. Go to Firebase Console > Authentication > Settings > Authorized domains.\n` +
-          `2. Click "Add domain" and paste: ${currentDomain}`
-        );
-      } else {
-        alert("Login failed: " + error.message);
-      }
-    }
-  };
-
-  const handleLogout = async () => {
-    if (!auth) return;
-    try {
-      await signOut(auth);
-      setIsProfileModalOpen(false);
-    } catch (error) {
-      console.error("Logout failed", error);
-    }
-  };
 
   return (
     <div className="flex h-screen overflow-hidden bg-gemini-bg text-gemini-text">
@@ -89,39 +37,9 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-4">
-            {!isFirebaseConfigured && (
-              <div className="hidden lg:flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 text-[10px] font-medium">
-                Auth not configured
-              </div>
-            )}
-            
-            {user ? (
-              <div 
-                className="flex items-center gap-3 cursor-pointer group"
-                onClick={() => setIsProfileModalOpen(true)}
-              >
-                <div className="hidden sm:block text-right">
-                  <p className="text-xs font-medium text-white group-hover:text-gemini-accent transition-colors">{user.displayName}</p>
-                  <p className="text-[10px] text-white/40">View Profile</p>
-                </div>
-                <div className="w-9 h-9 rounded-full overflow-hidden border-2 border-white/10 group-hover:border-gemini-accent transition-all">
-                  <img 
-                    src={user.photoURL || ""} 
-                    alt="profile" 
-                    className="w-full h-full object-cover"
-                    referrerPolicy="no-referrer"
-                  />
-                </div>
-              </div>
-            ) : (
-              <button
-                onClick={() => setIsLoginModalOpen(true)}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-white text-black text-sm font-semibold hover:bg-white/90 transition-all active:scale-95 shadow-lg shadow-white/5"
-              >
-                <LogIn size={18} />
-                <span>Login</span>
-              </button>
-            )}
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-white/40 text-[10px] font-medium">
+              Premium Video Downloader
+            </div>
           </div>
         </header>
 
@@ -136,21 +54,6 @@ export default function App() {
             <VideoDownloader />
           </div>
         </div>
-
-        {/* Login Modal */}
-        <LoginModal 
-          isOpen={isLoginModalOpen} 
-          onClose={() => setIsLoginModalOpen(false)} 
-          onLogin={handleLogin} 
-        />
-
-        {/* User Profile Modal */}
-        <UserProfileModal
-          isOpen={isProfileModalOpen}
-          onClose={() => setIsProfileModalOpen(false)}
-          onLogout={handleLogout}
-          user={user}
-        />
       </main>
     </div>
   );
