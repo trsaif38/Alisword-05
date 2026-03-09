@@ -52,6 +52,17 @@ export function GameCenter({ onEarn, stats, onUpdateStats, initialGame }: GameCe
   const [clickCount, setClickCount] = useState(0);
   const [showAdBreak, setShowAdBreak] = useState(false);
 
+  const incrementClicks = () => {
+    setClickCount(prev => {
+      const next = prev + 1;
+      if (next >= 5) {
+        setShowAdBreak(true);
+        return 0;
+      }
+      return next;
+    });
+  };
+
   // Spin State
   const [isSpinning, setIsSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
@@ -83,15 +94,12 @@ export function GameCenter({ onEarn, stats, onUpdateStats, initialGame }: GameCe
     return () => clearInterval(interval);
   }, [activeGame, showAdBreak]);
 
-  const incrementClicks = () => {
-    setClickCount(prev => {
-      const next = prev + 1;
-      if (next >= 5) {
-        setShowAdBreak(true);
-        return 0;
-      }
-      return next;
-    });
+  const handleAdClick = () => {
+    // Open Adsterra Direct Link
+    const directLink = import.meta.env.VITE_ADSTERRA_DIRECT_LINK || "https://www.highperformanceformat.com/v8p7z7z7?key=23520793c31cbb3b263ccdd8b6c5c450"; 
+    window.open(directLink, "_blank");
+    setShowAdBreak(false);
+    onEarn(10); // Reward for watching ad
   };
 
   useEffect(() => {
@@ -255,7 +263,7 @@ export function GameCenter({ onEarn, stats, onUpdateStats, initialGame }: GameCe
           আপনি অনেকগুলো কয়েন জিতেছেন! ইনকাম চালিয়ে যেতে নিচের বাটনে ক্লিক করে একটি ছোট অ্যাড দেখুন।
         </p>
         <button 
-          onClick={() => setShowAdBreak(false)}
+          onClick={handleAdClick}
           className="px-12 py-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold text-xl hover:scale-105 transition-all shadow-xl shadow-emerald-500/20 active:scale-95"
         >
           অ্যাড দেখুন এবং ইনকাম করুন
