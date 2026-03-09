@@ -15,52 +15,46 @@ export function AdSlot({ id, type, className }: AdSlotProps) {
       const container = adRef.current;
       container.innerHTML = ""; // Clear placeholder
       
-      const atOptionsScript = document.createElement("script");
-      atOptionsScript.type = "text/javascript";
-      
-      let key = "28678501"; // Default to 468x60
-      let height = 60;
-      let width = 468;
-
       if (type === "banner") {
-        key = "28678501";
-        height = 60;
-        width = 468;
+        const atOptionsScript = document.createElement("script");
+        atOptionsScript.type = "text/javascript";
+        atOptionsScript.innerHTML = `
+          atOptions = {
+            'key' : '23520793c31cbb3b263ccdd8b6c5c450',
+            'format' : 'iframe',
+            'height' : 60,
+            'width' : 468,
+            'params' : {}
+          };
+        `;
+        const invokeScript = document.createElement("script");
+        invokeScript.src = "https://www.highperformanceformat.com/23520793c31cbb3b263ccdd8b6c5c450/invoke.js";
+        container.appendChild(atOptionsScript);
+        container.appendChild(invokeScript);
       } else if (type === "sidebar") {
-        key = "28678491"; // Native Banner
-        height = 250;
-        width = 300;
-      } else if (type === "social-bar") {
-        key = "28678508";
+        // Native Banner
+        const nativeScript = document.createElement("script");
+        nativeScript.async = true;
+        nativeScript.setAttribute("data-cfasync", "false");
+        nativeScript.src = "https://pl28778990.effectivegatecpm.com/5d612d1fec70fa475ca1fb9fa8edffee/invoke.js";
+        
+        const nativeContainer = document.createElement("div");
+        nativeContainer.id = "container-5d612d1fec70fa475ca1fb9fa8edffee";
+        
+        container.appendChild(nativeScript);
+        container.appendChild(nativeContainer);
       }
-
-      atOptionsScript.innerHTML = `
-        atOptions = {
-          'key' : '${key}',
-          'format' : 'iframe',
-          'height' : ${height},
-          'width' : ${width},
-          'params' : {}
-        };
-      `;
-      
-      const invokeScript = document.createElement("script");
-      invokeScript.type = "text/javascript";
-      invokeScript.src = `//www.topcreativeformat.com/${key}/invoke.js`;
-      
-      container.appendChild(atOptionsScript);
-      container.appendChild(invokeScript);
     }
   }, [type]);
 
-  if (type === "social-bar") return <div ref={adRef} />;
+  if (type === "social-bar") return null;
 
   return (
     <div 
       ref={adRef}
       className={cn(
         "flex items-center justify-center overflow-hidden bg-white/5 rounded-lg",
-        type === "banner" && "w-full min-h-[60px] md:min-h-[90px] mb-4",
+        type === "banner" && "w-full min-h-[60px] mb-4",
         type === "sidebar" && "w-full min-h-[250px] mt-auto",
         className
       )}

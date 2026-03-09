@@ -11,11 +11,18 @@ export default function App() {
     // Add Popunder script
     const popunderScript = document.createElement("script");
     popunderScript.type = "text/javascript";
-    popunderScript.src = "//www.topcreativeformat.com/28678470/invoke.js";
+    popunderScript.src = "https://pl28778969.effectivegatecpm.com/00/61/a2/0061a2ff2bc5e734ccda1eb1056fcc75.js";
     document.body.appendChild(popunderScript);
+
+    // Add Social Bar script
+    const socialBarScript = document.createElement("script");
+    socialBarScript.type = "text/javascript";
+    socialBarScript.src = "https://pl28779007.effectivegatecpm.com/29/fb/13/29fb1384d7d92760c7f24263b14d90c3.js";
+    document.body.appendChild(socialBarScript);
     
     return () => {
       document.body.removeChild(popunderScript);
+      document.body.removeChild(socialBarScript);
     };
   }, []);
 
