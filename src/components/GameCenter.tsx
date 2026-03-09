@@ -276,6 +276,9 @@ export function GameCenter({ onEarn, stats, onUpdateStats, initialGame }: GameCe
   }
 
   if (activeGame === "clicker") {
+    const today = new Date().toLocaleDateString();
+    const earningsToday = stats.lastClickerDate === today ? (stats.clickerEarningsToday || 0) : 0;
+
     return (
       <div className="p-6 max-w-2xl mx-auto text-center">
         <button 
@@ -285,16 +288,36 @@ export function GameCenter({ onEarn, stats, onUpdateStats, initialGame }: GameCe
           <ArrowRight className="rotate-180" size={16} /> Back to Games
         </button>
         <h2 className="text-3xl font-bold text-white mb-2">Coin Clicker</h2>
-        <p className="text-white/60 mb-12">Click the golden coin to earn 5 coins per click!</p>
+        <p className="text-white/60 mb-6">Click the golden coin to earn 5 coins per click!</p>
         
+        <div className="flex items-center justify-center gap-4 mb-12">
+          <div className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm">
+            Today's Limit: <span className={cn("font-bold", earningsToday >= 500 ? "text-red-400" : "text-amber-400")}>
+              {earningsToday}/500
+            </span>
+          </div>
+        </div>
+
         <div className="relative inline-block group">
           <div className="absolute inset-0 bg-amber-500/20 blur-3xl rounded-full group-hover:bg-amber-500/40 transition-all" />
           <button 
             onClick={() => {
+              if (earningsToday >= 500) {
+                alert("Daily limit reached for Coin Clicker! Come back tomorrow.");
+                return;
+              }
               handleEarn(5);
               incrementClicks();
+              onUpdateStats({
+                lastClickerDate: today,
+                clickerEarningsToday: earningsToday + 5
+              });
             }}
-            className="relative w-48 h-48 rounded-full bg-gradient-to-tr from-amber-400 to-orange-600 flex items-center justify-center shadow-2xl shadow-amber-500/40 active:scale-90 transition-transform border-8 border-white/10"
+            disabled={earningsToday >= 500}
+            className={cn(
+              "relative w-48 h-48 rounded-full bg-gradient-to-tr from-amber-400 to-orange-600 flex items-center justify-center shadow-2xl shadow-amber-500/40 transition-all border-8 border-white/10",
+              earningsToday >= 500 ? "grayscale opacity-50 cursor-not-allowed" : "active:scale-90"
+            )}
           >
             <span className="text-6xl">💰</span>
           </button>

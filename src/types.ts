@@ -4,6 +4,8 @@ export interface UserStats {
   withdrawals: WithdrawalRequest[];
   lastSpinDate?: string;
   spinsToday?: number;
+  lastClickerDate?: string;
+  clickerEarningsToday?: number;
 }
 
 export interface WithdrawalRequest {
