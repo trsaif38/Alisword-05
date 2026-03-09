@@ -1,17 +1,28 @@
 import React from "react";
-import { Settings, History, DollarSign, Download } from "lucide-react";
+import { Settings, History, DollarSign, Download, Gamepad2, Wallet, LayoutDashboard } from "lucide-react";
 import { cn } from "@/src/lib/utils";
 import { AdSlot } from "./AdSlot";
 
 interface SidebarProps {
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
+  activeView: string;
+  setActiveView: (view: string) => void;
 }
 
 export function Sidebar({
   isOpen,
   setIsOpen,
+  activeView,
+  setActiveView,
 }: SidebarProps) {
+  const navItems = [
+    { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { id: "games", label: "Game Center", icon: Gamepad2 },
+    { id: "downloader", label: "Video Downloader", icon: Download },
+    { id: "withdraw", label: "Withdraw", icon: Wallet },
+  ];
+
   return (
     <>
       {/* Mobile Overlay */}
@@ -30,8 +41,8 @@ export function Sidebar({
       >
         <div className="flex flex-col h-full p-4">
           <div className="flex items-center gap-3 px-4 py-3 mb-6 rounded-full bg-white/5 text-sm font-medium">
-            <Download size={20} className="text-blue-400" />
-            Alisword
+            <DollarSign size={20} className="text-emerald-400" />
+            Alisword Earning
           </div>
 
           <div className="flex-1 overflow-y-auto scrollbar-hide">
@@ -39,10 +50,24 @@ export function Sidebar({
               Navigation
             </div>
             <div className="space-y-1">
-              <button className="flex items-center gap-3 w-full px-4 py-2 rounded-lg text-white bg-white/10 transition-colors text-sm">
-                <Download size={16} />
-                Downloader
-              </button>
+              {navItems.map((item) => (
+                <button 
+                  key={item.id}
+                  onClick={() => {
+                    setActiveView(item.id);
+                    setIsOpen(false);
+                  }}
+                  className={cn(
+                    "flex items-center gap-3 w-full px-4 py-2.5 rounded-xl transition-all text-sm font-medium",
+                    activeView === item.id 
+                      ? "text-white bg-white/10 shadow-lg shadow-white/5" 
+                      : "text-white/60 hover:text-white hover:bg-white/5"
+                  )}
+                >
+                  <item.icon size={18} />
+                  {item.label}
+                </button>
+              ))}
             </div>
           </div>
 
@@ -50,10 +75,6 @@ export function Sidebar({
             <button className="flex items-center gap-3 w-full px-4 py-2 rounded-lg text-white/70 hover:bg-white/5 transition-colors text-sm">
               <History size={18} />
               Activity
-            </button>
-            <button className="flex items-center gap-3 w-full px-4 py-2 rounded-lg text-emerald-400 hover:bg-emerald-400/5 transition-colors text-sm font-medium">
-              <DollarSign size={18} />
-              Revenue Dashboard
             </button>
             <button className="flex items-center gap-3 w-full px-4 py-2 rounded-lg text-white/70 hover:bg-white/5 transition-colors text-sm">
               <Settings size={18} />

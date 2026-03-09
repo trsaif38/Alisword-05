@@ -9,6 +9,7 @@
   --color-gemini-input: #1e1f20;
   --color-gemini-text: #e3e3e3;
   --color-gemini-accent: #4b90ff;
+  --animate-spin-slow: spin 3s linear infinite;
 }
 
 @layer base {
