@@ -11,6 +11,7 @@ import { UserStats, WithdrawalRequest } from "./types";
 export default function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeView, setActiveView] = useState("dashboard");
+  const [selectedGame, setSelectedGame] = useState<string | null>(null);
   const [stats, setStats] = useState<UserStats>(() => {
     const saved = localStorage.getItem("alisword_stats");
     return saved ? JSON.parse(saved) : {
@@ -67,6 +68,10 @@ export default function App() {
     };
   }, []);
 
+  const handleUpdateStats = (newStats: Partial<UserStats>) => {
+    setStats(prev => ({ ...prev, ...newStats }));
+  };
+
   return (
     <div className="flex h-screen overflow-hidden bg-gemini-bg text-gemini-text">
       {/* Social Bar Ad */}
@@ -76,7 +81,10 @@ export default function App() {
         isOpen={isSidebarOpen}
         setIsOpen={setIsSidebarOpen}
         activeView={activeView}
-        setActiveView={setActiveView}
+        setActiveView={(view) => {
+          setActiveView(view);
+          setSelectedGame(null); // Reset when navigating from sidebar
+        }}
       />
 
       <main className="flex-1 flex flex-col relative min-w-0">
@@ -118,8 +126,21 @@ export default function App() {
           </div>
           
           <div className="flex-1 overflow-y-auto scrollbar-hide">
-            {activeView === 'dashboard' && <Dashboard stats={stats} setActiveView={setActiveView} />}
-            {activeView === 'games' && <GameCenter onEarn={handleEarn} />}
+            {activeView === 'dashboard' && (
+              <Dashboard 
+                stats={stats} 
+                setActiveView={setActiveView} 
+                onPlayGame={(id) => setSelectedGame(id)}
+              />
+            )}
+            {activeView === 'games' && (
+              <GameCenter 
+                onEarn={handleEarn} 
+                stats={stats} 
+                onUpdateStats={handleUpdateStats} 
+                initialGame={selectedGame}
+              />
+            )}
             {activeView === 'downloader' && <VideoDownloader />}
             {activeView === 'withdraw' && <Withdraw coins={stats.coins} onWithdraw={handleWithdraw} />}
           </div>

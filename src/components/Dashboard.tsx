@@ -1,49 +1,104 @@
 import React from "react";
-import { Wallet, Trophy, TrendingUp, Users, ArrowUpRight, Clock } from "lucide-react";
+import { Wallet, Trophy, TrendingUp, Users, ArrowUpRight, Clock, Gamepad2, Gift, Play } from "lucide-react";
 import { UserStats } from "@/src/types";
+import { GAMES } from "./GameCenter";
+import { cn } from "@/src/lib/utils";
 
 interface DashboardProps {
   stats: UserStats;
   setActiveView: (view: string) => void;
+  onPlayGame?: (gameId: string) => void;
 }
 
-export function Dashboard({ stats, setActiveView }: DashboardProps) {
+export function Dashboard({ stats, setActiveView, onPlayGame }: DashboardProps) {
   return (
     <div className="p-4 md:p-8 max-w-6xl mx-auto">
-      <div className="mb-12">
-        <h2 className="text-4xl font-bold text-white mb-3 tracking-tight">Welcome Back!</h2>
-        <p className="text-white/40 text-lg">Track your earnings and play games to earn more.</p>
+      <div className="mb-8">
+        <h2 className="text-3xl font-bold text-white mb-2 tracking-tight">Welcome Back!</h2>
+        <p className="text-white/40">Track your earnings and play games to earn more.</p>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-        <div className="p-6 rounded-3xl bg-white/5 border border-white/10">
-          <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center mb-4">
+      {/* Stats Grid - Smaller and one line on large screens */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
+        <div className="p-4 rounded-2xl bg-white/5 border border-white/10 flex items-center gap-4">
+          <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center shrink-0">
             <Wallet className="text-amber-500" size={20} />
           </div>
-          <p className="text-white/40 text-xs uppercase tracking-widest mb-1">Current Balance</p>
-          <h3 className="text-2xl font-bold text-white">{stats.coins} Coins</h3>
+          <div>
+            <p className="text-white/40 text-[10px] uppercase tracking-widest">Balance</p>
+            <h3 className="text-lg font-bold text-white">{stats.coins}</h3>
+          </div>
         </div>
-        <div className="p-6 rounded-3xl bg-white/5 border border-white/10">
-          <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center mb-4">
+        <div className="p-4 rounded-2xl bg-white/5 border border-white/10 flex items-center gap-4">
+          <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center shrink-0">
             <TrendingUp className="text-emerald-500" size={20} />
           </div>
-          <p className="text-white/40 text-xs uppercase tracking-widest mb-1">Total Earned</p>
-          <h3 className="text-2xl font-bold text-white">{stats.totalEarned} Coins</h3>
+          <div>
+            <p className="text-white/40 text-[10px] uppercase tracking-widest">Earned</p>
+            <h3 className="text-lg font-bold text-white">{stats.totalEarned}</h3>
+          </div>
         </div>
-        <div className="p-6 rounded-3xl bg-white/5 border border-white/10">
-          <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center mb-4">
+        <div className="p-4 rounded-2xl bg-white/5 border border-white/10 flex items-center gap-4">
+          <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center shrink-0">
             <Trophy className="text-blue-500" size={20} />
           </div>
-          <p className="text-white/40 text-xs uppercase tracking-widest mb-1">Rank</p>
-          <h3 className="text-2xl font-bold text-white">Bronze</h3>
+          <div>
+            <p className="text-white/40 text-[10px] uppercase tracking-widest">Rank</p>
+            <h3 className="text-lg font-bold text-white">Bronze</h3>
+          </div>
         </div>
-        <div className="p-6 rounded-3xl bg-white/5 border border-white/10">
-          <div className="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center mb-4">
+        <div className="p-4 rounded-2xl bg-white/5 border border-white/10 flex items-center gap-4">
+          <div className="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center shrink-0">
             <Users className="text-purple-500" size={20} />
           </div>
-          <p className="text-white/40 text-xs uppercase tracking-widest mb-1">Referrals</p>
-          <h3 className="text-2xl font-bold text-white">0 Users</h3>
+          <div>
+            <p className="text-white/40 text-[10px] uppercase tracking-widest">Invites</p>
+            <h3 className="text-lg font-bold text-white">0</h3>
+          </div>
+        </div>
+      </div>
+
+      {/* Games Section on Home Page */}
+      <div className="mb-12">
+        <div className="flex items-center justify-between mb-6">
+          <h4 className="text-2xl font-bold text-white">Available Games</h4>
+          <button 
+            onClick={() => setActiveView('games')}
+            className="text-emerald-400 text-sm hover:underline flex items-center gap-1"
+          >
+            View All <ArrowUpRight size={14} />
+          </button>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {GAMES.map((game) => (
+            <div 
+              key={game.id}
+              className="group relative overflow-hidden rounded-2xl bg-white/5 border border-white/10 p-5 hover:bg-white/[0.08] transition-all"
+            >
+              <div className={cn(
+                "w-12 h-12 rounded-xl bg-gradient-to-tr flex items-center justify-center mb-4 shadow-lg",
+                game.color
+              )}>
+                {game.icon === "Gamepad2" && <Gamepad2 className="text-white" size={24} />}
+                {game.icon === "Trophy" && <Trophy className="text-white" size={24} />}
+                {game.icon === "Gift" && <Gift className="text-white" size={24} />}
+              </div>
+              
+              <h3 className="text-lg font-bold text-white mb-1">{game.title}</h3>
+              <p className="text-white/40 text-xs mb-4 line-clamp-1">{game.description}</p>
+              
+              <button 
+                onClick={() => {
+                  if (onPlayGame) onPlayGame(game.id);
+                  setActiveView('games');
+                }}
+                className="w-full flex items-center justify-center gap-2 py-2 rounded-xl bg-white text-black font-bold text-sm hover:bg-white/90 transition-all"
+              >
+                <Play size={14} fill="currentColor" />
+                Play
+              </button>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -91,15 +146,8 @@ export function Dashboard({ stats, setActiveView }: DashboardProps) {
           <h4 className="text-xl font-bold text-white">Quick Actions</h4>
           <div className="space-y-3">
             <button 
-              onClick={() => setActiveView('games')}
-              className="w-full flex items-center justify-between p-5 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold hover:scale-[1.02] transition-all shadow-lg shadow-blue-500/20"
-            >
-              Play Games
-              <ArrowUpRight size={20} />
-            </button>
-            <button 
               onClick={() => setActiveView('withdraw')}
-              className="w-full flex items-center justify-between p-5 rounded-2xl bg-white/5 border border-white/10 text-white font-bold hover:bg-white/10 transition-all"
+              className="w-full flex items-center justify-between p-5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold hover:scale-[1.02] transition-all shadow-lg shadow-emerald-500/20"
             >
               Withdraw Coins
               <Wallet size={20} />
@@ -119,6 +167,3 @@ export function Dashboard({ stats, setActiveView }: DashboardProps) {
   );
 }
 
-function cn(...classes: any[]) {
-  return classes.filter(Boolean).join(' ');
-}

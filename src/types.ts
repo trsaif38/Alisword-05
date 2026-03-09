@@ -2,6 +2,8 @@ export interface UserStats {
   coins: number;
   totalEarned: number;
   withdrawals: WithdrawalRequest[];
+  lastSpinDate?: string;
+  spinsToday?: number;
 }
 
 export interface WithdrawalRequest {

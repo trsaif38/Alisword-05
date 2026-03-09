@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { Gamepad2, Trophy, ArrowRight, Wallet, History, Gift, Play } from "lucide-react";
 import { cn } from "@/src/lib/utils";
-import { Game } from "@/src/types";
+import { Game, UserStats } from "@/src/types";
 
 interface GameCenterProps {
   onEarn: (amount: number) => void;
+  stats: UserStats;
+  onUpdateStats: (stats: Partial<UserStats>) => void;
+  initialGame?: string | null;
 }
 
-const GAMES: Game[] = [
+export const GAMES: Game[] = [
   {
     id: "clicker",
     title: "Coin Clicker",
@@ -42,12 +45,17 @@ const GAMES: Game[] = [
   }
 ];
 
-export function GameCenter({ onEarn }: GameCenterProps) {
-  const [activeGame, setActiveGame] = useState<string | null>(null);
+export function GameCenter({ onEarn, stats, onUpdateStats, initialGame }: GameCenterProps) {
+  const [activeGame, setActiveGame] = useState<string | null>(initialGame || null);
   const [gameCoins, setGameCoins] = useState(0);
   const [sessionTotal, setSessionTotal] = useState(0);
   const [clickCount, setClickCount] = useState(0);
   const [showAdBreak, setShowAdBreak] = useState(false);
+
+  // Spin State
+  const [isSpinning, setIsSpinning] = useState(false);
+  const [rotation, setRotation] = useState(0);
+  const [spinResult, setSpinResult] = useState<number | null>(null);
 
   // Memory Game State
   const [cards, setCards] = useState<{id: number, val: string, flipped: boolean, matched: boolean}[]>([]);
@@ -85,6 +93,12 @@ export function GameCenter({ onEarn }: GameCenterProps) {
       return next;
     });
   };
+
+  useEffect(() => {
+    if (initialGame) {
+      handlePlay(initialGame);
+    }
+  }, [initialGame]);
 
   const handlePlay = (gameId: string) => {
     setActiveGame(gameId);
@@ -190,28 +204,65 @@ export function GameCenter({ onEarn }: GameCenterProps) {
 
   // Spin Logic
   const handleSpin = () => {
-    incrementClicks();
-    const rewards = [10, 20, 50, 100, 0, 5];
-    const win = rewards[Math.floor(Math.random() * rewards.length)];
-    alert(`You won ${win} coins!`);
-    if (win > 0) handleEarn(win);
+    if (isSpinning) return;
+
+    const today = new Date().toLocaleDateString();
+    const spinsToday = stats.lastSpinDate === today ? (stats.spinsToday || 0) : 0;
+
+    if (spinsToday >= 3) {
+      alert("Daily limit reached! Come back tomorrow.");
+      return;
+    }
+
+    setIsSpinning(true);
+    const sections = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
+    const winningIndex = Math.floor(Math.random() * sections.length);
+    const win = sections[winningIndex];
+    
+    // Calculate rotation: 360/10 = 36 degrees per section
+    // We want to land in the middle of the section
+    // Extra rotations for effect (5 full circles = 1800 degrees)
+    const newRotation = rotation + 1800 + (360 - (winningIndex * 36));
+    setRotation(newRotation);
+
+    setTimeout(() => {
+      setIsSpinning(false);
+      setSpinResult(win);
+      handleEarn(win);
+      
+      // Update stats
+      onUpdateStats({
+        lastSpinDate: today,
+        spinsToday: spinsToday + 1
+      });
+
+      // Trigger ad break after every spin
+      setTimeout(() => {
+        setShowAdBreak(true);
+      }, 1000);
+    }, 3000);
   };
 
   if (showAdBreak) {
     return (
-      <div className="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center p-6 text-center">
-        <div className="w-24 h-24 rounded-full bg-amber-500/20 flex items-center justify-center mb-6 animate-pulse">
-          <Gift className="text-amber-500" size={48} />
+      <div className="fixed inset-0 z-[100] bg-gemini-bg flex flex-col items-center justify-center p-6 text-center">
+        <div className="w-32 h-32 rounded-full bg-emerald-500/10 flex items-center justify-center mb-8 relative">
+          <div className="absolute inset-0 rounded-full border-4 border-emerald-500/20 border-t-emerald-500 animate-spin" />
+          <Gift className="text-emerald-500 animate-bounce" size={48} />
         </div>
-        <h2 className="text-3xl font-bold text-white mb-2">Bonus Ad Break!</h2>
-        <p className="text-white/60 mb-8 max-w-md">You've earned a lot of coins! Click below to watch a short ad and continue earning.</p>
+        <h2 className="text-3xl font-bold text-white mb-4">বোনাস অ্যাড ব্রেক! 🎁</h2>
+        <p className="text-white/60 mb-8 max-w-md text-lg">
+          আপনি অনেকগুলো কয়েন জিতেছেন! ইনকাম চালিয়ে যেতে নিচের বাটনে ক্লিক করে একটি ছোট অ্যাড দেখুন।
+        </p>
         <button 
           onClick={() => setShowAdBreak(false)}
-          className="px-12 py-4 rounded-2xl bg-white text-black font-bold text-lg hover:scale-105 transition-transform"
+          className="px-12 py-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold text-xl hover:scale-105 transition-all shadow-xl shadow-emerald-500/20 active:scale-95"
         >
-          Continue Earning
+          অ্যাড দেখুন এবং ইনকাম করুন
         </button>
-        <p className="mt-4 text-white/20 text-xs uppercase tracking-widest">Ad will trigger on click</p>
+        <p className="mt-6 text-white/20 text-xs uppercase tracking-[0.2em]">
+          ক্লিক করার সাথে সাথে অ্যাড লোড হবে
+        </p>
       </div>
     );
   }
@@ -327,6 +378,10 @@ export function GameCenter({ onEarn }: GameCenterProps) {
   }
 
   if (activeGame === "spin") {
+    const today = new Date().toLocaleDateString();
+    const spinsToday = stats.lastSpinDate === today ? (stats.spinsToday || 0) : 0;
+    const sections = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
+
     return (
       <div className="p-6 max-w-2xl mx-auto text-center">
         <button 
@@ -336,17 +391,62 @@ export function GameCenter({ onEarn }: GameCenterProps) {
           <ArrowRight className="rotate-180" size={16} /> Back to Games
         </button>
         <h2 className="text-3xl font-bold text-white mb-2">Daily Spin</h2>
-        <p className="text-white/60 mb-12">Spin the lucky wheel for big rewards!</p>
+        <p className="text-white/60 mb-4">Spin the lucky wheel for big rewards!</p>
         
-        <div className="relative w-64 h-64 mx-auto mb-12">
-          <div className="absolute inset-0 rounded-full border-8 border-white/10 animate-spin-slow" />
+        <div className="flex items-center justify-center gap-4 mb-8">
+          <div className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm">
+            Spins Today: <span className="text-white font-bold">{spinsToday}/3</span>
+          </div>
+        </div>
+
+        <div className="relative w-80 h-80 mx-auto mb-12">
+          {/* Pointer */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-2 z-20 w-8 h-8 text-amber-500">
+            <ArrowRight className="-rotate-90" size={32} fill="currentColor" />
+          </div>
+
+          {/* Wheel */}
+          <div 
+            className="w-full h-full rounded-full border-8 border-white/10 relative overflow-hidden transition-transform duration-[3000ms] ease-out"
+            style={{ transform: `rotate(${rotation}deg)` }}
+          >
+            {sections.map((val, i) => (
+              <div 
+                key={i}
+                className="absolute top-0 left-1/2 w-1/2 h-1/2 origin-bottom-left flex items-start justify-center pt-4"
+                style={{ 
+                  transform: `rotate(${i * 36}deg)`,
+                  backgroundColor: i % 2 === 0 ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.02)',
+                  clipPath: 'polygon(0 0, 100% 0, 0 100%)'
+                }}
+              >
+                <span className="text-xs font-bold text-white/60 -rotate-[18deg] translate-x-4 translate-y-2">
+                  {val}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          {/* Center Button */}
           <button 
             onClick={handleSpin}
-            className="absolute inset-4 rounded-full bg-gradient-to-tr from-purple-500 to-pink-600 flex items-center justify-center text-white font-bold text-2xl shadow-2xl shadow-purple-500/40 active:scale-95 transition-transform"
+            disabled={isSpinning || spinsToday >= 3}
+            className={cn(
+              "absolute inset-[35%] rounded-full z-10 flex items-center justify-center text-white font-bold text-lg shadow-2xl transition-all active:scale-95",
+              isSpinning || spinsToday >= 3 
+                ? "bg-white/10 cursor-not-allowed" 
+                : "bg-gradient-to-tr from-purple-500 to-pink-600 shadow-purple-500/40 hover:scale-105"
+            )}
           >
-            SPIN
+            {isSpinning ? "..." : "SPIN"}
           </button>
         </div>
+
+        {spinResult !== null && !isSpinning && (
+          <div className="mb-8 animate-bounce">
+            <p className="text-2xl font-bold text-amber-400">You won {spinResult} Coins!</p>
+          </div>
+        )}
         
         <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
           <p className="text-white/40 text-sm uppercase tracking-widest mb-1">Session Earnings</p>
