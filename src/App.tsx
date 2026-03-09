@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Menu, Download } from "lucide-react";
 import { Sidebar } from "./components/Sidebar";
 import { AdSlot } from "./components/AdSlot";
@@ -7,8 +7,23 @@ import { VideoDownloader } from "./components/VideoDownloader";
 export default function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  useEffect(() => {
+    // Add Popunder script
+    const popunderScript = document.createElement("script");
+    popunderScript.type = "text/javascript";
+    popunderScript.src = "//www.topcreativeformat.com/28678470/invoke.js";
+    document.body.appendChild(popunderScript);
+    
+    return () => {
+      document.body.removeChild(popunderScript);
+    };
+  }, []);
+
   return (
     <div className="flex h-screen overflow-hidden bg-gemini-bg text-gemini-text">
+      {/* Social Bar Ad */}
+      <AdSlot id="social-bar-ad" type="social-bar" />
+      
       <Sidebar
         isOpen={isSidebarOpen}
         setIsOpen={setIsSidebarOpen}
