@@ -11,6 +11,15 @@ interface DashboardProps {
 }
 
 export function Dashboard({ stats, setActiveView, onPlayGame }: DashboardProps) {
+  const [copied, setCopied] = React.useState(false);
+
+  const handleCopy = () => {
+    const url = window.location.origin;
+    navigator.clipboard.writeText(url);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
     <div className="p-4 md:p-8 max-w-6xl mx-auto">
       <div className="mb-8">
@@ -47,7 +56,10 @@ export function Dashboard({ stats, setActiveView, onPlayGame }: DashboardProps) 
             <h3 className="text-lg font-bold text-white">Bronze</h3>
           </div>
         </div>
-        <div className="p-4 rounded-2xl bg-white/5 border border-white/10 flex items-center gap-4">
+        <button 
+          onClick={handleCopy}
+          className="p-4 rounded-2xl bg-white/5 border border-white/10 flex items-center gap-4 hover:bg-white/10 transition-all text-left relative group"
+        >
           <div className="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center shrink-0">
             <Users className="text-purple-500" size={20} />
           </div>
@@ -55,7 +67,13 @@ export function Dashboard({ stats, setActiveView, onPlayGame }: DashboardProps) 
             <p className="text-white/40 text-[10px] uppercase tracking-widest">Invites</p>
             <h3 className="text-lg font-bold text-white">0</h3>
           </div>
-        </div>
+          <div className={cn(
+            "absolute -top-8 left-1/2 -translate-x-1/2 px-3 py-1 bg-emerald-500 text-white text-[10px] font-bold rounded-full transition-opacity pointer-events-none",
+            copied ? "opacity-100" : "opacity-0"
+          )}>
+            Link Copied!
+          </div>
+        </button>
       </div>
 
       {/* Games Section on Home Page */}
