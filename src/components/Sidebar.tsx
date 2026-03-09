@@ -1,7 +1,8 @@
 import React from "react";
-import { Settings, History, DollarSign, Download, Gamepad2, Wallet, LayoutDashboard } from "lucide-react";
+import { Settings, History, DollarSign, Download, Gamepad2, Wallet, LayoutDashboard, LogOut } from "lucide-react";
 import { cn } from "@/src/lib/utils";
 import { AdSlot } from "./AdSlot";
+import { useAuth } from "../lib/AuthContext";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -16,6 +17,8 @@ export function Sidebar({
   activeView,
   setActiveView,
 }: SidebarProps) {
+  const { logout } = useAuth();
+
   const navItems = [
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
     { id: "games", label: "Game Center", icon: Gamepad2 },
@@ -79,6 +82,14 @@ export function Sidebar({
             <button className="flex items-center gap-3 w-full px-4 py-2 rounded-lg text-white/70 hover:bg-white/5 transition-colors text-sm">
               <Settings size={18} />
               Settings
+            </button>
+            
+            <button 
+              onClick={() => logout()}
+              className="flex items-center gap-3 w-full px-4 py-2 rounded-lg text-red-400 hover:bg-red-500/10 transition-colors text-sm"
+            >
+              <LogOut size={18} />
+              Logout
             </button>
             
             {/* Adsterra Sidebar Ad Slot */}

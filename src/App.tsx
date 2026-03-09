@@ -6,9 +6,13 @@ import { VideoDownloader } from "./components/VideoDownloader";
 import { GameCenter } from "./components/GameCenter";
 import { Withdraw } from "./components/Withdraw";
 import { Dashboard } from "./components/Dashboard";
+import { Login } from "./components/Login";
 import { UserStats, WithdrawalRequest } from "./types";
 
-export default function App() {
+import { AuthProvider, useAuth } from "./lib/AuthContext";
+
+function AppContent() {
+  const { user, loading } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeView, setActiveView] = useState("dashboard");
   const [selectedGame, setSelectedGame] = useState<string | null>(null);
@@ -72,6 +76,18 @@ export default function App() {
     setStats(prev => ({ ...prev, ...newStats }));
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gemini-bg flex items-center justify-center">
+        <div className="w-12 h-12 rounded-full border-4 border-emerald-500/20 border-t-emerald-500 animate-spin" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Login />;
+  }
+
   return (
     <div className="flex h-screen overflow-hidden bg-gemini-bg text-gemini-text">
       {/* Social Bar Ad */}
@@ -115,6 +131,19 @@ export default function App() {
               <span className="text-amber-500 text-sm font-bold">{stats.coins}</span>
               <span className="text-amber-500/60 text-[10px] uppercase font-bold tracking-widest">Coins</span>
             </div>
+            
+            {/* User Profile Info */}
+            <div className="hidden sm:flex items-center gap-3 pl-4 border-l border-white/10">
+              <div className="text-right">
+                <p className="text-xs font-bold text-white leading-none mb-1">{user.displayName}</p>
+                <p className="text-[10px] text-white/40 leading-none">{user.email}</p>
+              </div>
+              <img 
+                src={user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName}`} 
+                alt={user.displayName || 'User'} 
+                className="w-8 h-8 rounded-full border border-white/10"
+              />
+            </div>
           </div>
         </header>
 
@@ -147,5 +176,13 @@ export default function App() {
         </div>
       </main>
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }
