@@ -1,4 +1,4 @@
-import { initializeApp } from "firebase/app";
+import { initializeApp, getApp, getApps } from "firebase/app";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
 import { getAnalytics } from "firebase/analytics";
 
@@ -12,10 +12,37 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
-const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-export const analytics = typeof window !== "undefined" ? getAnalytics(app) : null;
-export const googleProvider = new GoogleAuthProvider();
+// Check if we have at least the minimum required config
+const isFirebaseConfigured = !!firebaseConfig.apiKey;
 
-export const loginWithGoogle = () => signInWithPopup(auth, googleProvider);
-export const logout = () => signOut(auth);
+let app;
+let auth: any;
+let analytics: any = null;
+let googleProvider: any = null;
+
+if (isFirebaseConfigured) {
+  try {
+    app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    googleProvider = new GoogleAuthProvider();
+    if (typeof window !== "undefined" && firebaseConfig.measurementId) {
+      analytics = getAnalytics(app);
+    }
+  } catch (error) {
+    console.error("Firebase initialization error:", error);
+  }
+}
+
+export { auth, analytics, googleProvider, isFirebaseConfigured };
+
+export const loginWithGoogle = async () => {
+  if (!isFirebaseConfigured || !auth) {
+    alert("Firebase is not configured. Please add your credentials in the settings.");
+    return;
+  }
+  return signInWithPopup(auth, googleProvider);
+};
+
+export const logout = async () => {
+  if (auth) return signOut(auth);
+};

@@ -3,10 +3,17 @@ import { useAuth } from "../lib/AuthContext";
 import { DollarSign, LogIn } from "lucide-react";
 
 export function Login() {
-  const { login } = useAuth();
+  const { login, isConfigured } = useAuth();
 
   return (
     <div className="min-h-screen bg-gemini-bg flex flex-col items-center justify-center p-6 text-center">
+      {!isConfigured && (
+        <div className="mb-8 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-500 max-w-md">
+          <p className="text-sm font-bold mb-1">Firebase Not Configured</p>
+          <p className="text-xs opacity-80">Please add your Firebase credentials in the AI Studio Settings to enable Google Login.</p>
+        </div>
+      )}
+
       <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-600 flex items-center justify-center shadow-2xl shadow-emerald-500/20 mb-8">
         <DollarSign size={40} className="text-white" />
       </div>
